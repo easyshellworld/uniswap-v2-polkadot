@@ -15,7 +15,6 @@
     "@parity/hardhat-polkadot": "^0.1.10",
     "dotenv": "^17.2.1",
     "hardhat": "^2.27.0",
-    "solc": "0.8.28",
-    "ws": "^8.18.3"
+    "solc": "0.8.28"
   }
 }

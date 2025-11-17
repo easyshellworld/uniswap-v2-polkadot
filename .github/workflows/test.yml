@@ -42,9 +42,12 @@ jobs:
       - name: Create Hardhat polyfill and wrapper scripts
         run: |
           mkdir -p scripts
+
           cat > scripts/hh-polyfill.js << 'EOF'
           // Inject WebSocket into the child Node process before hardhat loads @polkadot packages
-          global.WebSocket = require('ws');
+          if (typeof global.WebSocket === 'undefined') {
+            global.WebSocket = require('ws');
+          }
           EOF
 
           cat > scripts/hh-node.js << 'EOF'
@@ -71,11 +74,16 @@ jobs:
         run: |
           NODE_OPTIONS="--no-warnings" node ./scripts/hh-node.js &
           sleep 30
+        shell: bash
 
-      - name: Run Hardhat tests
-        run: npx hardhat test --network localNode
+      - name: Run Hardhat tests (preload polyfill)
+        run: |
+          # Ensure the test process also preloads the polyfill so @polkadot packages have global.WebSocket
+          node -r ./scripts/hh-polyfill.js ./node_modules/.bin/hardhat test --network localNode
+        shell: bash
 
       - name: Stop background processes
         if: always()
         run: |
           pkill -f "hardhat node" || true
+        shell: bash
