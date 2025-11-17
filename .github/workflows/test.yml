@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,13 +36,39 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+          # install ws into node_modules for the polyfill (no package.json changes)
           npm install --no-save --no-audit --no-fund ws
 
-      - 
-
-       -name: Start Hardhat node in background (fixed)
+      - name: Create Hardhat polyfill and wrapper scripts
         run: |
-          # NODE_OPTIONS optional; keep your --no-warnings if needed
+          mkdir -p scripts
+          cat > scripts/hh-polyfill.js << 'EOF'
+          // Inject WebSocket into the child Node process before hardhat loads @polkadot packages
+          global.WebSocket = require('ws');
+          EOF
+
+          cat > scripts/hh-node.js << 'EOF'
+          // Spawn a child node that preloads hh-polyfill.js, then runs the hardhat binary
+          const { spawn } = require('child_process');
+          const path = require('path');
+
+          const hardhatBin = path.resolve('node_modules', '.bin', 'hardhat');
+          const polyfill = path.resolve('scripts', 'hh-polyfill.js');
+
+          // node -r <polyfill> <hardhatBin> node
+          const args = ['-r', polyfill, hardhatBin, 'node'];
+          const proc = spawn('node', args, { stdio: 'inherit' });
+
+          proc.on('exit', code => process.exit(code));
+          proc.on('error', err => {
+            console.error('Failed to start hardhat node:', err);
+            process.exit(1);
+          });
+          EOF
+        shell: bash
+
+      - name: Start Hardhat node in background (fixed)
+        run: |
           NODE_OPTIONS="--no-warnings" node ./scripts/hh-node.js &
           sleep 30
 
