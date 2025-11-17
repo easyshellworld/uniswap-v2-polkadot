@@ -36,27 +36,13 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install --save-dev ws
+          npm install --no-save --no-audit --no-fund ws
 
-      - name: Create Hardhat WebSocket wrapper (scheme A)
+      - 
+
+       -name: Start Hardhat node in background (fixed)
         run: |
-          mkdir -p scripts
-          cat > scripts/hh-node.js << 'EOF'
-          // Inject WebSocket before Hardhat loads any polkadot api packages
-          global.WebSocket = require('ws');
-
-          const { spawn } = require('child_process');
-          const proc = spawn('npx', ['hardhat', 'node'], { stdio: 'inherit' });
-
-          proc.on('exit', code => process.exit(code));
-          proc.on('error', err => {
-            console.error('Failed to start hardhat node:', err);
-            process.exit(1);
-          });
-          EOF
-
-      - name: Start Hardhat node in background (fixed)
-        run: |
+          # NODE_OPTIONS optional; keep your --no-warnings if needed
           NODE_OPTIONS="--no-warnings" node ./scripts/hh-node.js &
           sleep 30
 
