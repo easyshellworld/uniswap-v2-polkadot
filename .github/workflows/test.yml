@@ -2,9 +2,9 @@ name: Hardhat Tests
 
 on:
   push:
-    branches: [ main]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main]
+    branches: [ main, develop ]
 
 jobs:
   test:
@@ -36,9 +36,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install WebSocket for Node.js
+        run: npm install --save-dev ws
+
       - name: Start Hardhat node in background
         run: |
-          npx hardhat node &
+          NODE_OPTIONS="--no-warnings" npx hardhat node &
           sleep 10
 
       - name: Run Hardhat tests
