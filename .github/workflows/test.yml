@@ -73,7 +73,7 @@ jobs:
       - name: Start Hardhat node in background (fixed)
         run: |
           NODE_OPTIONS="--no-warnings" node ./scripts/hh-node.js &
-          sleep 30
+          sleep 10
         shell: bash
 
       - name: Run Hardhat tests (preload polyfill)
