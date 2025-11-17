@@ -21,11 +21,11 @@ task("start-pvm-node", "Start PVM node for EVM bytecode testing")
     // Get paths from config or use defaults
     const nodeBinaryPath = networkConfig.nodeConfig?.nodeBinaryPath 
       ? path.resolve(projectRoot, networkConfig.nodeConfig.nodeBinaryPath)
-      : path.resolve(projectRoot, "../revive-dev-node-darwin-arm64");
+      : path.resolve(projectRoot, "./bin/revive-dev-node");
     
     const adapterBinaryPath = networkConfig.adapterConfig?.adapterBinaryPath
       ? path.resolve(projectRoot, networkConfig.adapterConfig.adapterBinaryPath)
-      : path.resolve(projectRoot, "../eth-rpc-darwin-arm64");
+      : path.resolve(projectRoot, "./bin/eth-rpc");
     
     // Use configured ports or provided parameters
     const finalNodePort = networkConfig.nodeConfig?.rpcPort || nodePort;
@@ -221,11 +221,11 @@ async function startPVMServices(hre, nodePort = 8000, adapterPort = 8545) {
   // Read from config or use defaults
   const nodeBinaryPath = networkConfig.nodeConfig?.nodeBinaryPath 
     ? path.resolve(projectRoot, networkConfig.nodeConfig.nodeBinaryPath)
-    : path.resolve(projectRoot, "../revive-dev-node-darwin-arm64");
+    : path.resolve(projectRoot, "./bin/revive-dev-node");
   
   const adapterBinaryPath = networkConfig.adapterConfig?.adapterBinaryPath
     ? path.resolve(projectRoot, networkConfig.adapterConfig.adapterBinaryPath)
-    : path.resolve(projectRoot, "../eth-rpc-darwin-arm64");
+    : path.resolve(projectRoot, "./bin/eth-rpc");
   
   // Use configured ports or provided parameters
   const finalNodePort = networkConfig.nodeConfig?.rpcPort || nodePort;
