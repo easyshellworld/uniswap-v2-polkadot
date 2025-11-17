@@ -34,15 +34,31 @@ jobs:
           chmod +x ./bin/revive-dev-node
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Install WebSocket for Node.js
-        run: npm install --save-dev ws
-
-      - name: Start Hardhat node in background
         run: |
-          NODE_OPTIONS="--no-warnings" npx hardhat node &
-          sleep 10
+          npm ci
+          npm install --save-dev ws
+
+      - name: Create Hardhat WebSocket wrapper (scheme A)
+        run: |
+          mkdir -p scripts
+          cat > scripts/hh-node.js << 'EOF'
+          // Inject WebSocket before Hardhat loads any polkadot api packages
+          global.WebSocket = require('ws');
+
+          const { spawn } = require('child_process');
+          const proc = spawn('npx', ['hardhat', 'node'], { stdio: 'inherit' });
+
+          proc.on('exit', code => process.exit(code));
+          proc.on('error', err => {
+            console.error('Failed to start hardhat node:', err);
+            process.exit(1);
+          });
+          EOF
+
+      - name: Start Hardhat node in background (fixed)
+        run: |
+          NODE_OPTIONS="--no-warnings" node ./scripts/hh-node.js &
+          sleep 30
 
       - name: Run Hardhat tests
         run: npx hardhat test --network localNode
